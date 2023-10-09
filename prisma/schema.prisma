@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  name               String              @db.VarChar(255)
+  email              String              @unique
+  cpf                String              @unique @db.VarChar(11)
+  cnpj               String?             @unique @db.VarChar(14)
+  role               Role
+  password_hash      String              @db.VarChar(128)
+  created            DateTime            @default(now())
+  modified           DateTime            @updatedAt
+  status             Status              @default(ACTIVATE)
+  wallet             Wallet?
+  transactionHistory transactionHistory?
+
+  @@map("users")
+}
+
+model Wallet {
+  id           String               @id @default(uuid())
+  user         User                 @relation(fields: [user_id], references: [id])
+  user_id      String               @unique
+  transactions transactionHistory[]
+  status       Status               @default(ACTIVATE)
+  created      DateTime             @default(now())
+  money        Decimal              @db.Money
+
+  @@map("wallets")
+}
+
+model transactionHistory {
+  id                   String   @id @default(uuid())
+  transaction_register Json
+  user                 User     @relation(fields: [user_id], references: [id])
+  user_id              String   @unique
+  wallet               Wallet   @relation(fields: [wallet_id], references: [id])
+  wallet_id            String   @unique
+  created              DateTime @default(now())
+
+  @@index([created(sort: Desc)])
+  @@map("transactio_histories")
+}
+
+enum Role {
+  CUSTOMER_SHOPKEEPER
+  CUSTOMER_NORMAL
+}
+
+enum Status {
+  ACTIVATE
+  INACTIVATE
+}
