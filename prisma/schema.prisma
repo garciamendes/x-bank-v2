@@ -14,7 +14,7 @@ model User {
   id                 String              @id @default(uuid())
   name               String?             @db.VarChar(255)
   email              String              @unique
-  cpf                String              @unique @db.VarChar(11)
+  cpf                String?             @unique @db.VarChar(11)
   cnpj               String?             @unique @db.VarChar(14)
   role               Role
   password_hash      String              @db.VarChar(128)
